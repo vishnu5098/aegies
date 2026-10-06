@@ -12,25 +12,31 @@ const navbar = document.getElementById('navbar');
 const backToTop = document.getElementById('backToTop');
 
 function handleHeaderScroll() {
-  if (window.scrollY > 40) {
-    navbar.classList.add('scrolled');
-  } else {
-    navbar.classList.remove('scrolled');
+  if (navbar) {
+    if (window.scrollY > 40) {
+      navbar.classList.add('scrolled');
+    } else {
+      navbar.classList.remove('scrolled');
+    }
   }
 
-  if (window.scrollY > 500) {
-    backToTop.classList.add('show');
-  } else {
-    backToTop.classList.remove('show');
+  if (backToTop) {
+    if (window.scrollY > 500) {
+      backToTop.classList.add('show');
+    } else {
+      backToTop.classList.remove('show');
+    }
   }
 }
 
 window.addEventListener('scroll', handleHeaderScroll);
+handleHeaderScroll();
 
-// Back to top
-backToTop.addEventListener('click', () => {
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-});
+if (backToTop) {
+  backToTop.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
 
 /* ============================================================
    2. MOBILE HAMBURGER MENU
@@ -39,32 +45,33 @@ const hamburger = document.getElementById('hamburger');
 const navMenu = document.getElementById('navMenu');
 
 function closeMobileMenu() {
+  if (!navMenu || !hamburger) return;
   navMenu.classList.remove('open');
   hamburger.classList.remove('active');
   hamburger.setAttribute('aria-expanded', 'false');
 }
 
-hamburger.addEventListener('click', () => {
-  const isOpen = navMenu.classList.toggle('open');
-  hamburger.classList.toggle('active', isOpen);
-  hamburger.setAttribute('aria-expanded', String(isOpen));
-});
+if (hamburger && navMenu) {
+  hamburger.addEventListener('click', () => {
+    const isOpen = navMenu.classList.toggle('open');
+    hamburger.classList.toggle('active', isOpen);
+    hamburger.setAttribute('aria-expanded', String(isOpen));
+  });
 
-// Close menu when a nav link is clicked
-document.querySelectorAll('.nav-link').forEach((link) => {
-  link.addEventListener('click', closeMobileMenu);
-});
+  document.querySelectorAll('.nav-link').forEach((link) => {
+    link.addEventListener('click', closeMobileMenu);
+  });
 
-// Close menu when clicking outside
-document.addEventListener('click', (e) => {
-  if (
-    navMenu.classList.contains('open') &&
-    !navMenu.contains(e.target) &&
-    !hamburger.contains(e.target)
-  ) {
-    closeMobileMenu();
-  }
-});
+  document.addEventListener('click', (e) => {
+    if (
+      navMenu.classList.contains('open') &&
+      !navMenu.contains(e.target) &&
+      !hamburger.contains(e.target)
+    ) {
+      closeMobileMenu();
+    }
+  });
+}
 
 /* ============================================================
    3. ACTIVE NAV LINK ON SCROLL (scroll spy)
@@ -73,6 +80,8 @@ const sections = document.querySelectorAll('section[id]');
 const navLinks = document.querySelectorAll('.nav-link');
 
 function setActiveNav() {
+  if (!sections.length || !navLinks.length) return;
+
   const scrollPos = window.scrollY + 120;
 
   sections.forEach((section) => {
@@ -103,17 +112,22 @@ faqItems.forEach((item) => {
   const question = item.querySelector('.faq-question');
   const answer = item.querySelector('.faq-answer');
 
+  if (!question || !answer) return;
+
   question.addEventListener('click', () => {
     const isActive = item.classList.contains('active');
 
-    // Close all items
     faqItems.forEach((otherItem) => {
+      const otherQuestion = otherItem.querySelector('.faq-question');
+      const otherAnswer = otherItem.querySelector('.faq-answer');
+
+      if (!otherQuestion || !otherAnswer) return;
+
       otherItem.classList.remove('active');
-      otherItem.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
-      otherItem.querySelector('.faq-answer').style.maxHeight = null;
+      otherQuestion.setAttribute('aria-expanded', 'false');
+      otherAnswer.style.maxHeight = null;
     });
 
-    // Open the clicked item if it wasn't active
     if (!isActive) {
       item.classList.add('active');
       question.setAttribute('aria-expanded', 'true');
@@ -127,20 +141,23 @@ faqItems.forEach((item) => {
    ============================================================ */
 const revealElements = document.querySelectorAll('.reveal');
 
-// Use Intersection Observer for scroll reveal
-const revealObserver = new IntersectionObserver(
-  (entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-        revealObserver.unobserve(entry.target);
-      }
-    });
-  },
-  { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
-);
+if ('IntersectionObserver' in window && revealElements.length) {
+  const revealObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+  );
 
-revealElements.forEach((el) => revealObserver.observe(el));
+  revealElements.forEach((el) => revealObserver.observe(el));
+} else {
+  revealElements.forEach((el) => el.classList.add('visible'));
+}
 
 /* ============================================================
    6. COUNTER ANIMATION (statistics)
@@ -149,13 +166,14 @@ const counters = document.querySelectorAll('.counter');
 
 function animateCounter(counter) {
   const target = parseInt(counter.getAttribute('data-target'), 10);
+  if (Number.isNaN(target)) return;
+
   const duration = 1800;
   const startTime = performance.now();
 
   function updateCount(currentTime) {
     const elapsed = currentTime - startTime;
     const progress = Math.min(elapsed / duration, 1);
-    // Ease-out effect
     const eased = 1 - Math.pow(1 - progress, 3);
     counter.textContent = Math.floor(eased * target).toLocaleString();
 
@@ -169,19 +187,28 @@ function animateCounter(counter) {
   requestAnimationFrame(updateCount);
 }
 
-const counterObserver = new IntersectionObserver(
-  (entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        animateCounter(entry.target);
-        counterObserver.unobserve(entry.target);
-      }
-    });
-  },
-  { threshold: 0.5 }
-);
+if ('IntersectionObserver' in window && counters.length) {
+  const counterObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          animateCounter(entry.target);
+          counterObserver.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.5 }
+  );
 
-counters.forEach((counter) => counterObserver.observe(counter));
+  counters.forEach((counter) => counterObserver.observe(counter));
+} else {
+  counters.forEach((counter) => {
+    const target = parseInt(counter.getAttribute('data-target'), 10);
+    if (!Number.isNaN(target)) {
+      counter.textContent = target.toLocaleString();
+    }
+  });
+}
 
 /* ============================================================
    7. CONTACT FORM VALIDATION
@@ -189,106 +216,113 @@ counters.forEach((counter) => counterObserver.observe(counter));
 const contactForm = document.getElementById('contactForm');
 const formSuccess = document.getElementById('formSuccess');
 
-// Email regex
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-// Phone regex (accepts international formats, 7-15 digits)
-const phoneRegex = /^[+]?[\d\s-]{7,15}$/;
+if (contactForm) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const phoneRegex = /^[+]?([\d\s-]){7,15}$/;
 
-function setError(input, message) {
-  const group = input.closest('.form-group');
-  const errorMsg = group.querySelector('.error-msg');
-  input.classList.add('error');
-  errorMsg.textContent = message;
-  errorMsg.classList.add('visible');
-}
+  function setError(input, message) {
+    const group = input.closest('.form-group');
+    if (!group) return;
 
-function clearError(input) {
-  const group = input.closest('.form-group');
-  const errorMsg = group.querySelector('.error-msg');
-  input.classList.remove('error');
-  errorMsg.textContent = '';
-  errorMsg.classList.remove('visible');
-}
+    const errorMsg = group.querySelector('.error-msg');
+    if (!errorMsg) return;
 
-function validateField(input) {
-  const value = input.value.trim();
-  const fieldName = input.name;
-
-  // Clear previous error
-  clearError(input);
-
-  if (input.required && value === '') {
-    setError(input, 'This field is required.');
-    return false;
+    input.classList.add('error');
+    errorMsg.textContent = message;
+    errorMsg.classList.add('visible');
   }
 
-  if (fieldName === 'name' && value !== '' && value.length < 2) {
-    setError(input, 'Please enter a valid name.');
-    return false;
+  function clearError(input) {
+    const group = input.closest('.form-group');
+    if (!group) return;
+
+    const errorMsg = group.querySelector('.error-msg');
+    if (!errorMsg) return;
+
+    input.classList.remove('error');
+    errorMsg.textContent = '';
+    errorMsg.classList.remove('visible');
   }
 
-  if (fieldName === 'phone' && value !== '' && !phoneRegex.test(value)) {
-    setError(input, 'Please enter a valid phone number.');
-    return false;
-  }
+  function validateField(input) {
+    const value = input.value.trim();
+    const fieldName = input.name;
 
-  if (fieldName === 'email' && value !== '' && !emailRegex.test(value)) {
-    setError(input, 'Please enter a valid email address.');
-    return false;
-  }
+    clearError(input);
 
-  return true;
-}
-
-// Validate field on blur
-contactForm.querySelectorAll('input, select, textarea').forEach((input) => {
-  input.addEventListener('blur', () => {
-    validateField(input);
-  });
-
-  // Clear error while typing
-  input.addEventListener('input', () => {
-    if (input.classList.contains('error')) {
-      clearError(input);
+    if (input.required && value === '') {
+      setError(input, 'This field is required.');
+      return false;
     }
-  });
-});
 
-contactForm.addEventListener('submit', (e) => {
-  e.preventDefault();
-
-  let isValid = true;
-  const fields = contactForm.querySelectorAll('input, select, textarea');
-
-  fields.forEach((field) => {
-    if (!validateField(field)) {
-      isValid = false;
+    if (fieldName === 'name' && value !== '' && value.length < 2) {
+      setError(input, 'Please enter a valid name.');
+      return false;
     }
-  });
 
-  if (isValid) {
-    // Collect form data
-    const formData = new FormData(contactForm);
-    const data = Object.fromEntries(formData.entries());
+    if (fieldName === 'phone' && value !== '' && !phoneRegex.test(value)) {
+      setError(input, 'Please enter a valid phone number.');
+      return false;
+    }
 
-    // Simulate submission (replace with your backend endpoint)
-    console.log('Form submitted:', data);
+    if (fieldName === 'email' && value !== '' && !emailRegex.test(value)) {
+      setError(input, 'Please enter a valid email address.');
+      return false;
+    }
 
-    formSuccess.textContent =
-      'Thank you! Your message has been received. I will get back to you shortly.';
-    formSuccess.classList.remove('error');
-    contactForm.reset();
-  } else {
-    formSuccess.textContent = 'Please fix the errors above and try again.';
-    formSuccess.classList.add('error');
+    return true;
   }
 
-  // Hide success message after some time
-  setTimeout(() => {
-    formSuccess.textContent = '';
-    formSuccess.classList.remove('error');
-  }, 6000);
-});
+  contactForm.querySelectorAll('input, select, textarea').forEach((input) => {
+    input.addEventListener('blur', () => {
+      validateField(input);
+    });
+
+    input.addEventListener('input', () => {
+      if (input.classList.contains('error')) {
+        clearError(input);
+      }
+    });
+  });
+
+  contactForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    let isValid = true;
+    const fields = contactForm.querySelectorAll('input, select, textarea');
+
+    fields.forEach((field) => {
+      if (!validateField(field)) {
+        isValid = false;
+      }
+    });
+
+    if (isValid) {
+      const formData = new FormData(contactForm);
+      const data = Object.fromEntries(formData.entries());
+
+      console.log('Form submitted:', data);
+
+      if (formSuccess) {
+        formSuccess.textContent =
+          'Thank you! Your message has been received. I will get back to you shortly.';
+        formSuccess.classList.remove('error');
+      }
+
+      contactForm.reset();
+    } else if (formSuccess) {
+      formSuccess.textContent = 'Please fix the errors above and try again.';
+      formSuccess.classList.add('error');
+    }
+
+    setTimeout(() => {
+      if (formSuccess) {
+        formSuccess.textContent = '';
+        formSuccess.classList.remove('error');
+      }
+    }, 6000);
+  });
+}
 
 /* ============================================================
    8. DYNAMIC FOOTER YEAR

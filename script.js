@@ -300,27 +300,34 @@ if (contactForm) {
     if (isValid) {
       const formData = new FormData(contactForm);
       const data = Object.fromEntries(formData.entries());
-
-      console.log('Form submitted:', data);
+      const requirement = contactForm.querySelector('#requirement');
+      const requirementLabel = requirement.options[requirement.selectedIndex].text;
+      const message = [
+        'Insurance enquiry',
+        `Name: ${data.name}`,
+        `Phone: ${data.phone}`,
+        data.email ? `Email: ${data.email}` : null,
+        `Requirement: ${requirementLabel}`,
+        data.message ? `Message: ${data.message}` : null
+      ].filter(Boolean).join('\n');
+      const whatsappUrl = `https://wa.me/919447414120?text=${encodeURIComponent(message)}`;
+      const whatsappWindow = window.open(whatsappUrl, '_blank');
 
       if (formSuccess) {
-        formSuccess.textContent =
-          'Thank you! Your message has been received. I will get back to you shortly.';
-        formSuccess.classList.remove('error');
+        formSuccess.textContent = whatsappWindow
+          ? 'WhatsApp opened with your message. Review it and tap Send. Your form will stay filled until you return.'
+          : 'Your message is ready to send on WhatsApp, but the new window was blocked. Please allow pop-ups and submit again.';
+        formSuccess.classList.toggle('error', !whatsappWindow);
       }
 
-      contactForm.reset();
+      if (whatsappWindow) {
+        whatsappWindow.opener = null;
+      }
     } else if (formSuccess) {
       formSuccess.textContent = 'Please fix the errors above and try again.';
       formSuccess.classList.add('error');
     }
 
-    setTimeout(() => {
-      if (formSuccess) {
-        formSuccess.textContent = '';
-        formSuccess.classList.remove('error');
-      }
-    }, 6000);
   });
 }
 

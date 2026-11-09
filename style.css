@@ -1009,6 +1009,10 @@ h1, h2, h3, h4 {
   padding: 4px;
 }
 
+.partner-image-pnb {
+  object-fit: cover;
+}
+
 .partner-name {
   color: var(--text-muted);
   font-size: 15px;

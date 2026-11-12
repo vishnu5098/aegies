@@ -304,31 +304,14 @@ h1, h2, h3, h4 {
 .logo {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-family: var(--font-heading);
-  font-size: 24px;
-  font-weight: 700;
-  color: var(--navy);
+  flex-shrink: 0;
 }
 
-.logo-icon {
-  width: 42px;
-  height: 42px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--grad-navy);
-  color: var(--gold-light);
-  border-radius: 12px;
-}
-
-.logo-icon svg {
-  width: 24px;
-  height: 24px;
-}
-
-.logo-text .gold {
-  color: var(--gold);
+.logo-image {
+  display: block;
+  width: 66px;
+  height: 66px;
+  object-fit: contain;
 }
 
 .nav-menu {
@@ -1433,12 +1416,13 @@ h1, h2, h3, h4 {
 }
 
 .footer .logo {
-  color: var(--white);
   margin-bottom: 18px;
 }
 
-.footer .logo-icon {
-  background: var(--grad-royal);
+.footer .logo-image {
+  width: 120px;
+  height: 110px;
+  border-radius: 8px;
 }
 
 .footer-brand p {
